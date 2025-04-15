@@ -103,3 +103,47 @@ end
 data(df) * (mapping(:predictor, :parameters) * visual(Lines; label = "model") + mapping(:predictor, :fitted_parameters) * visual(Lines; color = :red, label = "fitted")) |> draw()
 
 data(df) * mapping(:predictor, :success, color = :same) * visual(Scatter; alpha = 0.5) |> draw()
+
+####
+
+using Turing
+
+@model function bmodel(predictor, measurement)
+    s² ~ InverseGamma(2, 3)
+    slope ~ Normal(0, 10)
+    intercept ~ Normal(10, 10)
+    μ = intercept .+ slope*predictor
+    measurement ~ MvNormal(μ, sqrt(s²))
+end
+
+function model(predictor, slope, intercept)
+    μ = slope*predictor + intercept
+    # identity(μ)
+end
+
+sample1 = rand ∘ Normal
+
+n = 100
+predictor = 10rand(n)
+intercept, slope = (15, 5)
+σ = 2
+
+Random.seed!(0)
+df = DataFrame(predictor = predictor)
+@chain df begin
+    @transform! :parameters = model.(:predictor, slope, intercept)
+    @transform! :measurement = sample1.(:parameters, σ)
+end
+
+chain = sample(bmodel(df.predictor, df.measurement), NUTS(), 1000, progress=false)
+
+fig = Figure()
+for (i, var_name) in enumerate((:s², :slope, :intercept))
+    draw!(
+        fig[i, 1],
+        data(chain) *
+        mapping(var_name; color=:chain => nonnumeric) *
+        AlgebraOfGraphics.density() *
+        visual(fillalpha=0)
+    )
+end
