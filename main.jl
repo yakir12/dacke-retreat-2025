@@ -1,102 +1,105 @@
+using Random
 using GLMakie, AlgebraOfGraphics, Distributions, DataFrames, Chain, DataFramesMeta
 using GLM, CoordinateTransformations, Rotations
 
-function model(x, slope, intercept)
-    μ = slope*x + intercept
+function model(predictor, slope, intercept)
+    μ = slope*predictor + intercept
     # identity(μ)
 end
 
 sample1 = rand ∘ Normal
 
 n = 100
-x = 10rand(n)
-slope, intercept = (5, 15)
+predictor = 10rand(n)
+intercept, slope = (15, 5)
 σ = 2
 
 Random.seed!(0)
-df = DataFrame(x = x)
+df = DataFrame(predictor = predictor)
 @chain df begin
-    @transform! :parameters = model.(:x, slope, intercept)
+    @transform! :parameters = model.(:predictor, slope, intercept)
     @transform! :measurement = sample1.(:parameters, σ)
 end
 
 fig = Figure()
-ax1 = Axis(fig[1,1], aspect = 1, xlabel = "x")
-hist!(ax1, df.x)
+ax1 = Axis(fig[1,1], aspect = 1, xlabel = "predictor")
+hist!(ax1, df.predictor)
 ax2 = Axis(fig[1,2], aspect = 1, xlabel = "measurement")
 hist!(ax2, df.measurement)
 ax3 = Axis(fig[1,3], aspect = 1, xlabel = "ϵ")
 hist!(ax3, df.parameters - df.measurement)
 
-data(df) * (mapping(:x, :parameters) * visual(Lines; color = :red, label = "$slope*x + $intercept") + mapping(:x, :measurement) * visual(Scatter; label = "noisy data")) |> draw()
+data(df) * (mapping(:predictor, :parameters) * visual(Lines; color = :red, label = "parameters") + mapping(:predictor, :measurement) * visual(Scatter; label = "measurement")) |> draw()
 
-m = lm(@formula(measurement ~ x), df)
+m = lm(@formula(measurement ~ 1 + predictor), df)
 fitted_intercept, fitted_slope = coef(m)
+fitted_sigma = std(residuals(m))
 
 Random.seed!(0)
 @chain df begin
-    @transform! :fitted_parameters = model.(:x, fitted_slope, fitted_intercept)
-    @transform! :ϵ̂ = :measurement .- :fitted_parameters
+    @transform! :fitted_parameters = model.(:predictor, fitted_slope, fitted_intercept)
+    @transform! :fitted_measurement = sample1.(:fitted_parameters, fitted_sigma)
+    @transform! :ϵ̂ = :parameters .- :fitted_parameters
 end
 
 @assert df.fitted_parameters == predict(m)
-@assert df.ϵ̂ == residuals(m)
-
-d = Distributions.fit(Normal, residuals(m))
 
 fig = Figure()
-ax = Axis(fig[1,1], xlabel = "x", ylabel = "measurement")
-lines!(ax, df.x, df.parameters, label = "parameters", color = :black)
+ax = Axis(fig[1,1], xlabel = "predictor", ylabel = "measurement")
+lines!(ax, df.predictor, df.parameters, label = "parameters", color = :red)
 
-scatter!(ax, df.x, df.measurement, label = "measurements", color = :green)
+scatter!(ax, df.predictor, df.measurement, label = "measurements", color = :black)
 
-lines!(ax, df.x, df.fitted_parameters, label = "fit", color = :red)
+lines!(ax, df.predictor, df.fitted_parameters, label = "fit", color = :green)
 
-rangebars!(ax, df.x, df.measurement, df.fitted_parameters, label = "residuals", color = :gray)
+rangebars!(ax, df.predictor, df.measurement, df.fitted_parameters, label = "residuals", color = :gray)
+
+scatter!(ax, df.predictor, df.fitted_measurement, label = "fitted measurements", color = :green)
+
 axislegend(ax, position = :lt)
 
-function generate(x)
-    μ = model(x, slope, intercept)
+function generate(predictor)
+    μ = model(predictor, slope, intercept)
     sample1(μ, σ)
 end
 
-scatter!(ax, x, generate.(x))
+scatter!(ax, predictor, generate.(predictor))
 
-####
+#### Binomial
 
-function model(x, slope, intercept)
-    μ = slope*x + intercept
+function model(predictor, slope, intercept)
+    μ = slope*predictor + intercept
     GLM.linkinv.(LogitLink(), μ)
 end
 
 sample1 = rand ∘ Bernoulli
 
 n = 300
-x = 5sort(rand(n) .- 0.5)
-slope, intercept = (2, 1)
+predictor = 5sort(rand(n) .- 0.5)
+intercept, slope = (2, 1)
 
 Random.seed!(0)
-df = DataFrame(x = x)
+df = DataFrame(predictor = predictor)
 @chain df begin 
-    @transform! :y0 = model.(:x, slope, intercept)
-    @transform! :success = sample1.(:y0)
+    @transform! :parameters = model.(:predictor, slope, intercept)
+    @transform! :success = sample1.(:parameters)
 end
 
-data(df) * mapping(:x, :success) * visual(Scatter; label = "noisy data") |> draw()
+data(df) * mapping(:predictor, :success) * visual(Scatter; label = "data") |> draw()
 
-m = glm(@formula(success ~ x), df, Binomial(), LogitLink())
+m = glm(@formula(success ~ predictor), df, Binomial(), LogitLink())
 
 fitted_intercept, fitted_slope = coef(m)
 
-df.y = predict(m)
-
-data(df) * (mapping(:x, :y0) * visual(Lines; label = "model") + mapping(:x, :y) * visual(Lines; color = :red, label = "fitted")) |> draw()
-
 Random.seed!(0)
 @chain df begin 
-    @transform! :y0_predicted = model.(:x, fitted_slope, fitted_intercept)
-    @transform! :success_predicted = sample1.(:y0_predicted)
-    @transform! :same = :success_predicted .== :success
+    @transform! :fitted_parameters = model.(:predictor, fitted_slope, fitted_intercept)
+    @transform! :fitted_sucesss = sample1.(:fitted_parameters)
+    @transform! :same = :fitted_sucesss .== :success
 end
 
-data(df) * mapping(:x, :success, color = :same) * visual(Scatter; alpha = 0.5) |> draw()
+@assert df.fitted_parameters ≈ predict(m)
+
+data(df) * (mapping(:predictor, :parameters) * visual(Lines; label = "model") + mapping(:predictor, :fitted_parameters) * visual(Lines; color = :red, label = "fitted")) |> draw()
+
+data(df) * mapping(:predictor, :success, color = :same) * visual(Scatter; alpha = 0.5) |> draw()
