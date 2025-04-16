@@ -3,11 +3,14 @@ using GLMakie, AlgebraOfGraphics, Distributions, DataFrames, Chain, DataFramesMe
 using GLM, CoordinateTransformations, Rotations
 
 function model(predictor, slope, intercept)
-    μ = slope*predictor + intercept
+    μ = intercept + slope*predictor
     # identity(μ)
 end
 
-sample1 = rand ∘ Normal
+function sample1(μ, σ)
+    dist = Normal(μ, σ)
+    rand(dist)
+end
 
 n = 100
 predictor = 10rand(n)
@@ -68,11 +71,14 @@ scatter!(ax, predictor, generate.(predictor))
 #### Binomial
 
 function model(predictor, slope, intercept)
-    μ = slope*predictor + intercept
+    μ = intercept + slope*predictor
     GLM.linkinv.(LogitLink(), μ)
 end
 
-sample1 = rand ∘ Bernoulli
+function sample1(p)
+    dist = Bernoulli(p)
+    rand(dist)
+end
 
 n = 300
 predictor = 5sort(rand(n) .- 0.5)
@@ -109,19 +115,23 @@ data(df) * mapping(:predictor, :success, color = :same) * visual(Scatter; alpha 
 using Turing
 
 @model function bmodel(predictor, measurement)
-    s² ~ InverseGamma(2, 3)
+    σ² ~ InverseGamma(2, 3)
+    σ = sqrt(σ²)
     slope ~ Normal(0, 10)
     intercept ~ Normal(10, 10)
     μ = intercept .+ slope*predictor
-    measurement ~ MvNormal(μ, sqrt(s²))
+    measurement ~ MvNormal(μ, σ)
 end
 
 function model(predictor, slope, intercept)
-    μ = slope*predictor + intercept
+    μ = intercept + slope*predictor
     # identity(μ)
 end
 
-sample1 = rand ∘ Normal
+function sample1(μ, σ)
+    dist = Normal(μ, σ)
+    rand(dist)
+end
 
 n = 100
 predictor = 10rand(n)
@@ -138,7 +148,7 @@ end
 chain = sample(bmodel(df.predictor, df.measurement), NUTS(), 1000, progress=false)
 
 fig = Figure()
-for (i, var_name) in enumerate((:s², :slope, :intercept))
+for (i, var_name) in enumerate(chain.name_map.parameters)
     draw!(
         fig[i, 1],
         data(chain) *
@@ -147,3 +157,4 @@ for (i, var_name) in enumerate((:s², :slope, :intercept))
         visual(fillalpha=0)
     )
 end
+
