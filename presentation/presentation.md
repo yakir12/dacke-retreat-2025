@@ -24,18 +24,41 @@ Hi my name is Yakir, I work as a Research Software Engineer at Marie Dacke's lab
 
 ---
 
-# Simple relationship
+# Measuring is never exact
 
-An independent variable affects a dependent one.
+- 1000 measurements of duck eggs
+- mean of 7
 
-Independent: regressor, predictor, or explanatory variable.
-Dependent: regressand, predicted, explained, or response variable. 
 
-```
-dependent = intercept + slope*independent
-```
+![bg right h:100%](media/measurement.svg)
 
-![bg right height:80%](media/linear.svg)
+<!-- 
+- Normal distribution
+- standard deviation of 1/2 
+-->
 
 ---
 
+# An independent variable affects a dependent one
+
+$$y = intercept + slope*x$$
+
+![bg right h:100%](media/linear.svg)
+
+<!-- 
+Independent: regressor, predictor, or explanatory variable.
+Dependent: regressand, predicted, explained, or response variable.
+-->
+
+---
+
+# Measuring this relationship
+
+- 30 measurements
+- all at $x = 2$
+- There is some variation from 3 + 2*2 (i.e. seven)
+
+![bg right h:100%](media/linear+noise.svg)
+
+
+---
