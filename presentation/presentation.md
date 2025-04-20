@@ -59,21 +59,55 @@ Dependent: regressand, predicted, explained, or response variable.
 <!-- 
 - Normal distribution
 - standard deviation of 1/2 
+- we fuck up the measurement (read, report, write the wrong numbers)
+- the device we use to measure with has some intrinsic error
+- we think we are measuring things for a predictor value of (say) 2, but in actuality we're measuring it for a different value 
+- the process is not governed by just one linear process the depends only on one predictor
 -->
 
 ---
 
-# Lets simulate some measurements
+# Simulation
 
 ```julia
+model(x) = intercept + slope*x
+
+function measure(μ)
+    d = Normal(μ, σ)
+    rand(d)
+end
+```
+
+![bg right h:100%](media/model+measurement.svg)
+
+<!-- 
 intercept = 3
 slope = 2
 σ = 2
+-->
 
-function measure(x)
-    μ = intercept + slope*x
-    dist = Normal(μ, σ)
-    rand(dist)
+---
+
+# Simulation
+
+```julia
+model(x) = 3 + 2*x
+
+function measure(μ)
+    d = Normal(μ, 2)
+    rand(d)
 end
-
 ```
+
+![bg right h:100%](media/model+measurement.svg)
+
+<!-- 
+intercept = 3
+slope = 2
+σ = 2
+-->
+
+
+--- 
+
+![bg right h:100%](media/measurements.svg)
