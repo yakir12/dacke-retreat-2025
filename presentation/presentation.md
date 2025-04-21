@@ -9,10 +9,13 @@ backgroundImage: url('https://marp.app/assets/hero-background.svg')
 
 # **GLMs**
 
-*Understanding Generalized linear models*
+Understanding Generalized Linear Models
+
+*Yakir Gagnon - Dacke retreat 2025*
 
 <!--
-Hi my name is Yakir, I work as a Research Software Engineer at Marie Dacke's lab, but I also work on hardware. Today I'll present an auto tracker I made for the Dacke Lab.  
+Hi my name is Yakir, I work as a Research Software/hardware Engineer at Marie Dacke's lab. 
+I believe that today everyone of us will end this session with a deeper, more useful, understanding of GLMs!  
 -->
 
 ---
@@ -20,7 +23,11 @@ Hi my name is Yakir, I work as a Research Software Engineer at Marie Dacke's lab
 # What?
 
 - Linear models → Generalized linear models → Generalized linear mixed model
-- PLEASE stop me as soon as you feel lost
+- PLEASE **stop me** as soon as you feel lost
+
+<!--
+We'll go step by step, understanding each step is important for understanding the next step, please please please stop when you feel unsure or uncertain. 
+-->
 
 ---
 
@@ -28,11 +35,13 @@ Hi my name is Yakir, I work as a Research Software Engineer at Marie Dacke's lab
 
 $$y = intercept + slope*x$$
 
-![bg right h:100%](media/linear.svg)
+![bg right h:100%](media/1.svg)
 
 <!-- 
 Independent: regressor, predictor, or explanatory variable.
 Dependent: regressand, predicted, explained, or response variable.
+
+So image a process that is literarily governed by this equation: you put 2 x-thingies in, you get 7 y-thingies out. Like a machine. 
 -->
 
 ---
@@ -41,28 +50,50 @@ Dependent: regressand, predicted, explained, or response variable.
 
 - 30 measurements
 - all at $x = 2$
-- There is some variation from 3 + 2*2 (i.e. seven)
+- There is some variation from $3 + 2*2$ (i.e. 7)
 
-![bg right h:100%](media/linear+noise.svg)
+![bg right h:100%](media/2.svg)
 
+<!-- 
+- we fuck up the measurement (read, report, write the wrong numbers)
+- the device we use to measure with has some intrinsic error
+- we think we are measuring things for a predictor value of (say) 2, but in actuality we're measuring it for a different value (2.1, 1.8, etc)
+- the process is not governed by just one linear process that depends only on one predictor, the story might be more complicated than that...
+-->
 
 ---
 
-# Measuring is never exact
-
-- 1000 measurements of duck eggs
-- mean of 7
+# Simulation
 
 
-![bg right h:100%](media/measurement.svg)
+$$y = intercept + slope*x$$
+
+![bg right h:100%](media/0.svg)
 
 <!-- 
-- Normal distribution
-- standard deviation of 1/2 
-- we fuck up the measurement (read, report, write the wrong numbers)
-- the device we use to measure with has some intrinsic error
-- we think we are measuring things for a predictor value of (say) 2, but in actuality we're measuring it for a different value 
-- the process is not governed by just one linear process the depends only on one predictor
+So, let's try to simulate a process and measurements. In this simulation we set the values of the parameters. We choose (as before):
+intercept = 3
+slope = 2
+-->
+---
+
+# Simulation
+
+```julia
+function model(x)
+    3 + 2x
+end
+
+
+
+
+
+```
+
+![bg right h:100%](media/0.svg)
+
+<!-- 
+OK, great. Here we have a function that given x, it returns y
 -->
 
 ---
@@ -70,7 +101,9 @@ Dependent: regressand, predicted, explained, or response variable.
 # Simulation
 
 ```julia
-model(x) = intercept + slope*x
+function model(x)
+    3 + 2x
+end
 
 function measure(μ)
     d = Normal(μ, σ)
@@ -78,7 +111,30 @@ function measure(μ)
 end
 ```
 
-![bg right h:100%](media/model+measurement.svg)
+![bg right h:100%](media/3.svg)
+
+<!-- 
+Now we add the noise from the measurement itself.
+IMPORTANT!!!!
+
+-->
+
+---
+
+# Simulation
+
+```julia
+function model(x)
+    3 + 2x
+end
+
+function measure(μ)
+    d = Normal(μ, 1)
+    rand(d)
+end
+```
+
+![bg right h:100%](media/3.svg)
 
 <!-- 
 intercept = 3
@@ -91,15 +147,17 @@ slope = 2
 # Simulation
 
 ```julia
-model(x) = 3 + 2*x
+function model(x)
+    3 + 2x
+end
 
 function measure(μ)
-    d = Normal(μ, 2)
+    d = Normal(μ, 1)
     rand(d)
 end
 ```
 
-![bg right h:100%](media/model+measurement.svg)
+![bg right h:100%](media/4.svg)
 
 <!-- 
 intercept = 3
@@ -107,7 +165,4 @@ slope = 2
 σ = 2
 -->
 
-
---- 
-
-![bg right h:100%](media/measurements.svg)
+---
