@@ -253,7 +253,7 @@ function process(x)
 end
 
 function measure(μ)
-    d = Normal(μ, σ)
+    d = Normal(μ, σ) # μ can be between -∞ and ∞
     rand(d)
 end
 ```
@@ -272,7 +272,7 @@ function process(x)
 end
 
 function measure(p)
-    d = Bernoulli(p)
+    d = Bernoulli(p) # here, p must be between 0 and 1!!!
     rand(d)
 end
 ```
@@ -287,12 +287,12 @@ end
 
 ```julia
 function process(x)
-    μ = intercept + slope*x
-    normalize_to_01(μ)
+    y = intercept + slope*x
+    normalize_to_01(y) # so we must normalize y
 end
 
 function measure(p)
-    d = Bernoulli(p)
+    d = Bernoulli(p) # here, p must be between 0 and 1!!!
     rand(d)
 end
 ```
@@ -306,8 +306,8 @@ normalize_to_01: return ranges between zero and one
 
 ```julia
 function process(x)
-    μ = 3 + 2*x
-    normalize_to_01(μ)
+    y = -6 + 2*x
+    normalize_to_01(y)
 end
 
 function measure(p)
