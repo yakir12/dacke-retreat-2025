@@ -74,11 +74,11 @@ lines!(ax, dist, color = :red)
 
 save("../media/9.svg", fig)
 
-intercept, slope = (-1, 2)
+intercept, slope = (-6, 2)
 
 function model(x)
-    μ = intercept + slope*x
-    GLM.linkinv.(LogitLink(), μ)
+    y = intercept + slope*x
+    GLM.linkinv.(LogitLink(), y)
 end
 
 function measure(p)
@@ -88,13 +88,36 @@ end
 
 n = 300
 x = 4sort(rand(n)) .+ 1
+pushfirst!(x, 1)
+push!(x, 5)
+unique!(x)
 
-y = intercept .+ slope*(x)
+process(x) = intercept + slope*(x)
+
+y = process.(x)
 p = GLM.linkinv.(LogitLink(), y)
 tf = measure.(p)
+ns = [count(tf[l .< x .< u]) for (l, u) in zip(1:4, 2:5)]
+# 
 
-function count
+using ForwardDiff
 
+fig = Figure()#size = (w, slope * w))#, backgroundcolor = :transparent);
+ax1 = Axis(fig[1, 1], xlabel = "x", ylabel = "y", ylabelcolor = :blue, yticks = range(extrema(y)..., 5), limits = ((1, 5), (-4, 4)))#, backgroundcolor = :transparent)
+ax2 = Axis(fig[1, 1], ylabel = "probability", ylabelcolor = :red, yticks = range(0, 1, 5), limits = ((1, 5), (0, 1)), yaxisposition = :right)#, backgroundcolor = :transparent)
+hidespines!(ax2)
+hidexdecorations!(ax2)
+# linkyaxes!(ax1, ax2)
+lines!(ax1, x, y, color = :blue)
+lines!(ax2, x, p, color = :red)
+x1 = 2
+y1 = process(x1)
+text!(ax1, x1, y1, text = "μ")
+text!(ax2, x1, GLM.linkinv.(LogitLink(), y1), text = "normalized", rotation = atan(ForwardDiff.derivative(Base.Fix1(GLM.linkinv, LogitLink()) ∘ process, x1)), align = (:center, :bottom))
+
+
+
+save("../media/10.svg", fig)
 
 
 
