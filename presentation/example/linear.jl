@@ -32,12 +32,69 @@ yr = measure.(model.(xr))
 save("../media/2.svg", fig)
 delete!(ax, noise2h)
 
-scatter!(ax, xr, yr, color = (:red, 0.5), markersize = 7, label = "measurement")
+measurementsh = scatter!(ax, xr, yr, color = (:red, 0.5), markersize = 7, label = "measurement")
 
 save("../media/3.svg", fig)
 delete!(ax, modelh)
 
 save("../media/4.svg", fig)
+
+
+# LM
+
+using GLM
+df = (; x = xr, y = yr)
+m = lm(@formula(y ~ 1 + x), df)
+fitted_intercept, fitted_slope = coef(m)
+fitted_sigma = std(residuals(m))
+
+yl = fitted_intercept .+ fitted_slope * x
+modelh = lines!(ax, x, yl, color = :green)
+
+save("../media/5.svg", fig)
+
+residualsh = rangebars!(ax, xr, yr, predict(m), color = :gray)
+
+save("../media/6.svg", fig)
+
+delete!(ax, measurementsh)
+delete!(ax, modelh)
+
+save("../media/7.svg", fig)
+
+fig = Figure(size = (w, slope * w), backgroundcolor = :transparent);
+ax = Axis(fig[1,1], xlabel = "residuals", ylabel = "#", backgroundcolor = :transparent, limits = ((-3, 3), nothing))
+hist!(ax, residuals(m); normalization = :pdf)
+
+save("../media/8.svg", fig)
+
+dist = Normal(0, 1)
+
+lines!(ax, dist, color = :red)
+
+save("../media/9.svg", fig)
+
+intercept, slope = (-1, 2)
+
+function model(x)
+    μ = intercept + slope*x
+    GLM.linkinv.(LogitLink(), μ)
+end
+
+function measure(p)
+    dist = Bernoulli(p)
+    rand(dist)
+end
+
+n = 300
+x = 4sort(rand(n)) .+ 1
+
+y = intercept .+ slope*(x)
+p = GLM.linkinv.(LogitLink(), y)
+tf = measure.(p)
+
+function count
+
 
 
 

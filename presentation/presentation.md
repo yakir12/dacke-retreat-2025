@@ -80,7 +80,7 @@ slope = 2
 # Simulation
 
 ```julia
-function model(x)
+function process(x)
     3 + 2x
 end
 
@@ -101,7 +101,7 @@ OK, great. Here we have a function that given x, it returns "y"
 # Simulation
 
 ```julia
-function model(x)
+function process(x)
     3 + 2x
 end
 
@@ -117,8 +117,8 @@ end
 Now we add the noise from the measurement itself.
 IMPORTANT!!! Take your time here
 
-- x goes into model
-- model returns "y" 
+- x goes into process
+- process returns "y" 
 - y is lambda
 - lambda goes into measure
 - here we build a distribution with mean lambda (what is y)
@@ -134,7 +134,7 @@ IMPORTANT!!! Take your time here
 # Simulation
 
 ```julia
-function model(x)
+function process(x)
     3 + 2x
 end
 
@@ -168,13 +168,156 @@ We created this data using two main functions:
 ---
 
 # Fitting a LM
-
-```julia
-lm(@formula(measurement ~ 1 + x), df)
-```
-
-TODO: add R, Python, Matlab implementations, just to illustrate that the syntax is both unimportant and similar
-maybe add a legend to the plots, to show that while the y axis is y, the data is model or measurement.
-Switch the word model with process (model comes after when you fit the data). 
+| Language |  Syntax                          |
+| -------- |  --------------------------------------- |
+| Julia    | `lm(@formula(measurement ~ x), data)`    |
+| R        | `lm(measurement ~ x, data = data)`       |
+| Python   | `LinearRegression().fit(x, measurement)` |
+| Matlab   | `fitlm(x,measurement)`                   |
+<!-- 
+The syntax is both unimportant and similar
+-->
 
 ---
+
+# Fitting a LM
+
+
+| coefficients | fitted | original |
+|--- |--- | --- |
+| intercept | 3.16 | 3 |
+| slope | 1.94 | 2 |
+
+
+![bg right h:100%](media/5.svg)
+
+<!-- 
+
+-->
+
+---
+
+# Fitting a LM
+
+With the residuals
+
+![bg right h:100%](media/6.svg)
+
+<!-- 
+
+-->
+
+---
+
+# Fitting a LM
+
+Just the residuals
+
+![bg right h:100%](media/7.svg)
+
+<!-- 
+
+-->
+
+---
+
+# Fitting a LM
+
+A histogram of the residuals
+
+![bg right h:100%](media/8.svg)
+
+<!-- 
+
+-->
+
+---
+
+# Fitting a LM
+
+What is the standard deviation of this probability distribution?
+
+![bg right h:100%](media/9.svg)
+
+<!-- 
+
+-->
+
+---
+
+# Simulating a non-normal process
+
+```julia
+function process(x)
+    intercept + slope*x
+end
+
+function measure(μ)
+    d = Normal(μ, σ)
+    rand(d)
+end
+```
+
+<!-- 
+
+-->
+
+---
+
+# Simulating a non-normal process
+
+```julia
+function process(x)
+    intercept + slope*x
+end
+
+function measure(p)
+    d = Bernoulli(p)
+    rand(d)
+end
+```
+
+<!-- 
+
+-->
+
+---
+
+# Simulating a non-normal process
+
+```julia
+function process(x)
+    μ = intercept + slope*x
+    normalize_to_01(μ)
+end
+
+function measure(p)
+    d = Bernoulli(p)
+    rand(d)
+end
+```
+
+<!-- 
+normalize_to_01: return ranges between zero and one
+-->
+---
+
+# Simulating a non-normal process
+
+```julia
+function process(x)
+    μ = 3 + 2*x
+    normalize_to_01(μ)
+end
+
+function measure(p)
+    d = Bernoulli(p)
+    rand(d)
+end
+```
+
+![bg right h:100%](media/10.svg)
+
+<!-- 
+normalize_to_01: return ranges between zero and one
+-->
