@@ -93,7 +93,7 @@ end
 ![bg right h:100%](media/0.svg)
 
 <!-- 
-OK, great. Here we have a function that given x, it returns y
+OK, great. Here we have a function that given x, it returns "y"
 -->
 
 ---
@@ -115,8 +115,18 @@ end
 
 <!-- 
 Now we add the noise from the measurement itself.
-IMPORTANT!!!!
+IMPORTANT!!! Take your time here
 
+- x goes into model
+- model returns "y" 
+- y is lambda
+- lambda goes into measure
+- here we build a distribution with mean lambda (what is y)
+- and some standard deviation, sigma
+- we then sample from that distribution, we take one random number
+- that's it, that's our measurement, the scatter points
+- we can do that again and again, for different x values, for the same x values
+- we will always get some spread that depends on two things: the mean, lambda, which in itself directly and wholly depends on x, and on some standard deviation
 -->
 
 ---
@@ -137,32 +147,34 @@ end
 ![bg right h:100%](media/3.svg)
 
 <!-- 
-intercept = 3
-slope = 2
-σ = 2
+In this simulation we arbitrarily set this standard deviation to 1  
 -->
 
 ---
 
 # Simulation
 
-```julia
-function model(x)
-    3 + 2x
-end
+We created this data using two main functions:
 
-function measure(μ)
-    d = Normal(μ, 1)
-    rand(d)
-end
-```
+1. `μ = 3 + 2x`
+2. `rand(Normal(μ, 1))` 
 
 ![bg right h:100%](media/4.svg)
 
 <!-- 
-intercept = 3
-slope = 2
-σ = 2
+
 -->
+
+---
+
+# Fitting a LM
+
+```julia
+lm(@formula(measurement ~ 1 + x), df)
+```
+
+TODO: add R, Python, Matlab implementations, just to illustrate that the syntax is both unimportant and similar
+maybe add a legend to the plots, to show that while the y axis is y, the data is model or measurement.
+Switch the word model with process (model comes after when you fit the data). 
 
 ---
