@@ -2,7 +2,6 @@
 marp: true
 theme: gaia
 _class: lead
-paginate: true
 backgroundColor: #fff
 backgroundImage: url('https://marp.app/assets/hero-background.svg')
 ---
@@ -19,6 +18,7 @@ I believe that today everyone of us will end this session with a deeper, more us
 -->
 
 ---
+<!-- paginate: true -->
 
 # What?
 
@@ -81,7 +81,8 @@ slope = 2
 
 ```julia
 function process(x)
-    3 + 2x
+    y = 3 + 2x
+    return y
 end
 
 
@@ -102,7 +103,8 @@ OK, great. Here we have a function that given x, it returns "y"
 
 ```julia
 function process(x)
-    3 + 2x
+    y = 3 + 2x
+    return y
 end
 
 function measure(μ)
@@ -135,7 +137,8 @@ IMPORTANT!!! Take your time here
 
 ```julia
 function process(x)
-    3 + 2x
+    y = 3 + 2x
+    return y
 end
 
 function measure(μ)
@@ -235,7 +238,8 @@ A histogram of the residuals
 
 # Fitting a LM
 
-What is the standard deviation of this probability distribution?
+* What is the standard deviation of this probability distribution?
+* It's 1!
 
 ![bg right h:100%](media/9.svg)
 
@@ -249,7 +253,8 @@ What is the standard deviation of this probability distribution?
 
 ```julia
 function process(x)
-    intercept + slope*x
+    y = intercept + slope*x
+    return y # here, y is the mean of the normal distribution
 end
 
 function measure(μ)
@@ -268,7 +273,8 @@ end
 
 ```julia
 function process(x)
-    intercept + slope*x
+    y = intercept + slope*x
+    return y
 end
 
 function measure(p)
@@ -288,7 +294,7 @@ end
 ```julia
 function process(x)
     y = intercept + slope*x
-    normalize_to_01(y) # so we must normalize y
+    return normalize_to_01(y) # so we must normalize y
 end
 
 function measure(p)
@@ -307,7 +313,29 @@ normalize_to_01: return ranges between zero and one
 ```julia
 function process(x)
     y = -6 + 2*x
-    normalize_to_01(y)
+    return normalize_to_01(y)
+end
+
+
+
+
+
+```
+
+![bg right h:100%](media/10.svg)
+
+<!-- 
+normalize_to_01: return ranges between zero and one
+-->
+
+---
+
+# Simulating a non-normal process
+
+```julia
+function process(x)
+    y = -6 + 2*x
+    return normalize_to_01(y)
 end
 
 function measure(p)
@@ -316,8 +344,39 @@ function measure(p)
 end
 ```
 
-![bg right h:100%](media/10.svg)
+![bg right h:100%](media/11.svg)
 
 <!-- 
 normalize_to_01: return ranges between zero and one
 -->
+
+---
+
+# Fitting a GLM
+| Language |  Syntax                          |
+| -------- |  --------------------------------------- |
+| Julia    | `glm(@formula(measurement ~ x), data, Binomial())`    |
+| R        | `glm(measurement ~ x, data = data, family = binomial)`       |
+| Python   | `smf.glm('measure ~ x', family=sm.families.Binomial(), data=data).fit()` |
+| Matlab   | `glmfit(x,measurement,'binomial')`                   |
+<!-- 
+The syntax is both unimportant and similar
+-->
+
+---
+
+# Fitting a GLM
+
+
+| coefficients | fitted | original |
+|--- |--- | --- |
+| intercept | -4.7 | -6 |
+| slope | 1.6 | 2 |
+
+![bg right h:100%](media/12.svg)
+
+<!-- 
+
+-->
+
+---

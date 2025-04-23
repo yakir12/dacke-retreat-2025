@@ -97,15 +97,15 @@ process(x) = intercept + slope*(x)
 y = process.(x)
 p = GLM.linkinv.(LogitLink(), y)
 tf = measure.(p)
-ns = [count(tf[l .< x .< u]) for (l, u) in zip(1:4, 2:5)]
+# ns = [count(tf[l .< x .< u]) for (l, u) in zip(1:4, 2:5)]
 # 
 
 using ForwardDiff
 
 
 fig = Figure(size = (h, 3h), backgroundcolor = :transparent);
-ax1 = Axis(fig[1, 1], yticklabelcolor = :blue, ylabelcolor = :blue, limits = ((1, 5), (-4, 4)), width = h/slope, height = h, ylabel = "y", backgroundcolor = :transparent)
-ax1a = Axis(fig[1, 1], yticklabelcolor = :red,  ylabelcolor = :red,  limits = ((1, 5), (-4, 4)), width = h/slope, height = h, ylabel = "p", yaxisposition = :right, yticks = 0:0.5:1, backgroundcolor = :transparent)
+ax1 = Axis(fig[1, 1], xlabel = "x", yticklabelcolor = :blue, ylabelcolor = :blue, limits = ((1, 5), (-4, 4)), width = h/slope, height = h, ylabel = "y", backgroundcolor = :transparent)
+ax1a = Axis(fig[1, 1], xlabel = "x", yticklabelcolor = :red,  ylabelcolor = :red,  limits = ((1, 5), (-4, 4)), width = h/slope, height = h, ylabel = "p", yaxisposition = :right, yticks = 0:0.5:1, backgroundcolor = :transparent)
 hidespines!(ax1a)
 hidexdecorations!(ax1a)
 lines!(ax1, x, y, color = :blue)
@@ -114,15 +114,21 @@ x1 = 2
 y1 = process(x1)
 text!(ax1, x1, y1, text = "$intercept + $(slope)x", rotation = atan(ForwardDiff.derivative(process, x1)), align = (:center, :bottom), color = :blue)
 text!(ax1, x1, GLM.linkinv.(LogitLink(), y1), text = "normalized", rotation = atan(ForwardDiff.derivative(Base.Fix1(GLM.linkinv, LogitLink()) ∘ process, x1)), align = (:center, :top), color = :red)
-hidexdecorations!(ax1, ticks = false, grid = false, minorgrid = false, minorticks = false)
-ax2 = Axis(fig[2, 1], ylabel = "succcess", yticks = (0:1, ["false", "true"]))
-scatter!(ax2, x, tf, alpha = 0.25)
-hidexdecorations!(ax2, ticks = false, grid = false, minorgrid = false, minorticks = false)
-ax3 = Axis(fig[3, 1], ylabel = "# succcesses", xlabel = "x")
-barplot!(ax3, 1.5:4.5, ns)
-linkxaxes!(ax1, ax1a)
-linkxaxes!(ax1, ax2)
-linkxaxes!(ax2, ax3)
+# hidexdecorations!(ax1, ticks = false, grid = false, minorgrid = false, minorticks = false)
+
+resize_to_layout!(fig)
+
+save("../media/10.svg", fig)
+
+fig = Figure(backgroundcolor = :transparent);
+ax2 = Axis(fig[1, 1], xlabel = "x", ylabel = "succcess", yticks = (0:1, ["false", "true"]), backgroundcolor = :transparent, limits = ((1, 5), nothing), width = h/slope, height = h)
+scatter!(ax2, x, tf, marker = '|')# alpha = 0.1)
+# hidexdecorations!(ax2, ticks = false, grid = false, minorgrid = false, minorticks = false)
+# ax3 = Axis(fig[3, 1], ylabel = "# succcesses", xlabel = "x")
+# barplot!(ax3, 1.5:4.5, ns)
+# linkxaxes!(ax1, ax1a)
+# linkxaxes!(ax1, ax2)
+# linkxaxes!(ax2, ax3)
 
 # fig = Figure(size = (h / slope, h), backgroundcolor = :transparent);
 # ax1 = Axis(fig[1, 1], yticklabelcolor = :blue, ylabelcolor = :blue, limits = ((1, 5), (-4, 4)), aspect = AxisAspect(1/slope), ylabel = "y", xlabel = "x", backgroundcolor = :transparent)
@@ -149,8 +155,12 @@ resize_to_layout!(fig)
 # #
 # linkxaxes!(ax1, ax2)
 
-save("../media/10.svg", fig)
+save("../media/11.svg", fig)
 
+
+df = (; x, tf)
+m = glm(@formula(tf ~ 1 + x), df, Binomial())
+fitted_intercept, fitted_slope = coef(m)
 
 
 
