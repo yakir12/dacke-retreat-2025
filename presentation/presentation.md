@@ -4,6 +4,7 @@ theme: gaia
 _class: lead
 backgroundColor: #fff
 backgroundImage: url('https://marp.app/assets/hero-background.svg')
+math: mathjax
 ---
 
 # **GLMs**
