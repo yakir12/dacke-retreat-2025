@@ -20,15 +20,20 @@ sector = map(θ, ϵ) do θ, ϵ
     rot = LinearMap(RotY(-θ))
     rot.(xyz)
 end
-sectorc = @lift 0.9 * $sector[n ÷ 2 + 1]
+sectorc = @lift $sector[n ÷ 2 + 1]
 
 shadow = map(x -> Point2f.(x), sector)
-shadowc = @lift 0.9 * $shadow[n ÷ 2 + 1]
+shadowc = @lift Point3f($shadow[n ÷ 2 + 1]..., 0)
+
+trianglev = @lift [zero(Point3f), $shadowc, $sectorc, zero(Point3f)]
+triangleh = @lift [zero(Point2f), $shadow[2], $shadow[end-1], zero(Point2f)]
 
 Εdeg = @lift round(Int, 2atand(tan($ϵ/2)/cos($θ)))
 
 lines!(ax, sector, color = :black)
 lines!(ax, shadow, color = :red)
+lines!(ax, trianglev, color = :gray)
+lines!(ax, triangleh, color = :gray)
 
 sectorh = text!(ax, zero(Point3f), text = @lift(string($ϵdeg, " °")), color = :black, align = (:center, :center), markerspace = :data, fontsize = 0.1, transform_marker = true, overdraw = true)
 
@@ -37,17 +42,23 @@ on(sectorc) do sectorc
     quat = Makie.rotation_between(Vec3f(sectorc0), Vec3f(sectorc))
     Makie.rotate!(sectorh, quat)
     Makie.rotate!(Accum, sectorh, -pi/2)
-    Makie.translate!(sectorh, sectorc...)
+    Makie.translate!(sectorh, 0.9sectorc...)
 end
 
 shadowh = text!(ax, zero(Point3f), text = @lift(string($Εdeg, " °")), color = :red, align = (:center, :center), markerspace = :data, fontsize = 0.1, transform_marker = true, overdraw = true)
 
 shadowc0 = shadowc[]
 on(shadowc) do shadowc
-    quat = Makie.rotation_between(Vec3f(shadowc0..., 0), Vec3f(shadowc..., 0))
+    quat = Makie.rotation_between(Vec3f(shadowc0), Vec3f(shadowc))
     Makie.rotate!(shadowh, -pi/2)
-    Makie.translate!(shadowh, shadowc..., 0)
+    Makie.translate!(shadowh, 0.9shadowc)
 end
+
+on(shadow) do shadow
+    p1 = shadow[end-1]
+    @show 2atand(reverse(p1)...)
+end
+
 
 hidedecorations!(ax)
 
