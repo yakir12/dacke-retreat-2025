@@ -4,7 +4,7 @@ fig = Figure()
 
 n = 101
 
-ax = Axis3(fig[1, 1], aspect = :data, limits = ((-0.1, 1.2), (-1, 1), (-0.1, 1.2)))
+ax = Axis3(fig[1, 1], aspect = :data, limits = ((-1.1, 1.2), (-1.1, 1.1), (-1.1, 1.2)))
 
 sg = SliderGrid(
     fig[2, 1],
@@ -22,8 +22,16 @@ sector = map(θ, ϵ) do θ, ϵ
 end
 sectorc = @lift $sector[n ÷ 2 + 1]
 
+antisector = map(θ, ϵ) do θ, ϵ
+    xyz = Point3f.(CartesianFromSpherical().(Spherical.(1, range(ϵ/2, 2π - ϵ/2, n), 0)))
+    rot = LinearMap(RotY(-θ))
+    rot.(xyz)
+end
+
 shadow = map(x -> Point2f.(x), sector)
 shadowc = @lift Point3f($shadow[n ÷ 2 + 1]..., 0)
+
+antishadow = map(x -> Point2f.(x), antisector)
 
 trianglev = @lift [zero(Point3f), $shadowc, $sectorc, zero(Point3f)]
 triangleh = @lift [zero(Point2f), $shadow[2], $shadow[end-1], zero(Point2f)]
@@ -31,9 +39,11 @@ triangleh = @lift [zero(Point2f), $shadow[2], $shadow[end-1], zero(Point2f)]
 Εdeg = @lift round(Int, 2atand(tan($ϵ/2)/cos($θ)))
 
 lines!(ax, sector, color = :black)
+lines!(ax, antisector, color = (:black, 0.5))
 lines!(ax, shadow, color = :red)
-lines!(ax, trianglev, color = :gray)
-lines!(ax, triangleh, color = :gray)
+lines!(ax, antishadow, color = (:red, 0.5))
+lines!(ax, trianglev, color = :blue)
+lines!(ax, triangleh, color = :blue)
 
 sectorh = text!(ax, zero(Point3f), text = @lift(string($ϵdeg, " °")), color = :black, align = (:center, :center), markerspace = :data, fontsize = 0.1, transform_marker = true, overdraw = true)
 
@@ -53,12 +63,6 @@ on(shadowc) do shadowc
     Makie.rotate!(shadowh, -pi/2)
     Makie.translate!(shadowh, 0.9shadowc)
 end
-
-on(shadow) do shadow
-    p1 = shadow[end-1]
-    @show 2atand(reverse(p1)...)
-end
-
 
 hidedecorations!(ax)
 

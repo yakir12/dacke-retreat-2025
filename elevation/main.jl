@@ -29,6 +29,7 @@ shadowc = @lift 0.9 * $shadow[n ÷ 2 + 1]
 
 lines!(ax, sector, color = :black)
 lines!(ax, shadow, color = :red)
+# poly!(ax, Sphere(zero(Point3f), 0.025), color = :red)
 
 sectorh = text!(ax, zero(Point3f), text = @lift(string($ϵdeg, " °")), color = :black, align = (:center, :center), markerspace = :data, fontsize = 0.1, transform_marker = true, overdraw = true)
 
