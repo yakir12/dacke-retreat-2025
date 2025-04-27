@@ -1,13 +1,13 @@
 using MixedModels, GLM, GLMakie, DataFrames, AlgebraOfGraphics, Distributions
 
-n = 50
 ngroups = 10
+n = 10ngroups
 intercept = 5
-slope = 10
-σ = .2
+slope = 1
+σ = 0.1
 
-individual_intercepts = 3randn(ngroups)
-individual_slopes = 3randn(ngroups)
+individual_intercepts = randn(ngroups)
+individual_slopes = randn(ngroups)
 
 df0 = DataFrame(x = rand(n), id = rand(1:ngroups, n))
 ndf2 = flatten(combine(groupby(df0, :id), :x => extrema => :x), :x)
@@ -27,7 +27,7 @@ function sample1(x, id, intercept_factor, slope_factor)
 end
 
 fig = Figure()
-sg = SliderGrid(fig[1, 1:3], (label = "intercept factor", range = 0:0.1:10, startvalue = 0), (label = "slope factor", range = 0:0.1:10, startvalue = 0), tellheight = false)
+sg = SliderGrid(fig[1, 1:3], (label = "intercept factor", range = 0:0.1:100, startvalue = 0), (label = "slope factor", range = 0:0.1:100, startvalue = 0), tellheight = false)
 
 intercept_factor, slope_factor = [s.value for s in sg.sliders]
 
@@ -73,22 +73,22 @@ end
 
 m3p = @lift $m3.pvalues[2]
 
-ax1 = Axis(fig[2,1], title = @lift(string("P = ", round($m1p, digits = 2))))
-ablines!(ax1, intercept, slope, color = :gray)
+ax1 = Axis(fig[2,1], title = @lift(string("Fixed only\nP = ", $m1p)))#round($m1p, digits = 2))))
+ablines!(ax1, intercept, slope, color = :gray, linewidth = 2)
 scatter!(ax1, datapoints)
-lines!(ax1, lmline)
+lines!(ax1, lmline, linewidth = 2)
 
-ax2 = Axis(fig[2,2], title = @lift(string("P = ", round($m2p, digits = 2))))
-ablines!(ax2, intercept, slope, color = :gray)
+ax2 = Axis(fig[2,2], title = @lift(string("Random intercept\nP = ", $m2p)))# round($m2p, digits = 2))))
+ablines!(ax2, intercept, slope, color = :gray, linewidth = 2)
 scatter!(ax2, datapoints, color = @lift($df.id), colorrange = (1, ngroups))
 linesegments!(ax2, rand_inter_lines, color = 1:ngroups, colorrange = (1, ngroups))
-lines!(ax2, ndf2pop_line, color = :black)
+lines!(ax2, ndf2pop_line, color = :black, linewidth = 2)
 
-ax3 = Axis(fig[2,3], title = @lift(string("P = ", round($m3p, digits = 2))))
-ablines!(ax3, intercept, slope, color = :gray)
+ax3 = Axis(fig[2,3], title = @lift(string("Random intercept & slope\nP = ", $m3p)))# round($m3p, digits = 2))))
+ablines!(ax3, intercept, slope, color = :gray, linewidth = 2)
 scatter!(ax3, datapoints, color = @lift($df.id), colorrange = (1, ngroups))
 linesegments!(ax3, rand_inter_slope_lines, color = 1:ngroups, colorrange = (1, ngroups))
-lines!(ax3, ndf3pop_line, color = :black)
+lines!(ax3, ndf3pop_line, color = :black, linewidth = 2)
 
 linkaxes!(ax1, ax2)
 linkaxes!(ax2, ax3)
@@ -99,9 +99,6 @@ end
 
 
 display(fig)
-
-
-
 
 
 
