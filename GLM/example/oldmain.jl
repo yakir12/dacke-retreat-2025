@@ -1,6 +1,6 @@
-using MixedModels, GLM, GLMakie, DataFrames, AlgebraOfGraphics, Distributions
+using MixedModels, GLM, GLMakie, DataFrames, AlgebraOfGraphics, Distributions, Random
 
-ngroups = 10
+ngroups = 100
 n = 10
 intercept = 5
 slope = 1
@@ -12,6 +12,8 @@ individual_slopes = randn(ngroups)
 df = DataFrame(seed = rand(ngroups) .- 0.5, id = 1:ngroups)
 transform!(df, :seed => ByRow(seed -> rand(Truncated(Normal(seed, 0.1), -0.5, 0.5), n)) => :x)
 df0 = flatten(select(df, Not(:seed)), :x)
+shuffle!(df0)
+deleteat!(df0, 1:100)
 
 # df0 = DataFrame(x = rand(n), id = rand(1:ngroups, n))
 ndf2 = flatten(combine(groupby(df0, :id), :x => extrema => :x), :x)

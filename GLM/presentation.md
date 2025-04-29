@@ -381,3 +381,31 @@ The syntax is both unimportant and similar
 -->
 
 ---
+
+# GLMM
+
+![bg right w:100%](media/12.svg)
+
+<!-- 
+
+-->
+
+---
+# GLMM
+
+![bg right h:100%](media/13.svg)
+
+<!-- 
+
+-->
+
+---
+# GLMM
+
+![bg right h:100%](media/14.svg)
+
+<!-- 
+
+-->
+
+---
