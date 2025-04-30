@@ -172,14 +172,23 @@ We created this data using two main functions:
 ---
 
 # Fitting a LM
+
 | Language |  Syntax                          |
 | -------- |  --------------------------------------- |
 | Julia    | `lm(@formula(measurement ~ x), data)`    |
 | R        | `lm(measurement ~ x, data = data)`       |
 | Python   | `LinearRegression().fit(x, measurement)` |
 | Matlab   | `fitlm(x,measurement)`                   |
+
 <!-- 
 The syntax is both unimportant and similar
+95% of the issues will not be with this one line of code
+it will be with prepping the data
+loading it
+preprocessing it
+interpreting it correctly
+understanding the results 
+plotting and reporting
 -->
 
 ---
@@ -246,6 +255,31 @@ A histogram of the residuals
 
 <!-- 
 
+-->
+
+---
+
+# GLM
+
+- The residuals of the response variable don't have to be linearly distributed 
+- Easy to interpret
+- Able to deal with categorical predictors
+- Deals fine with unbalanced datasets
+
+---
+
+# ʻohana
+
+| Family | Support | Uses |
+| --- | --- | --- |
+| Normal | (-∞, +∞) | Linear response data |
+| Gamma | (0, +∞) | continuous, non-negative and positive-skewed data |
+| Poisson | integers | counts in fixed amount of time/space |
+| Bernoulli | true/false | outcome of a yes-no result |
+| Binomial | integers | counts of a yes-no result |
+
+<!-- 
+ʻohana means family (from the lilo and stitch movie)
 -->
 
 ---
@@ -354,6 +388,7 @@ normalize_to_01: return ranges between zero and one
 ---
 
 # Fitting a GLM
+
 | Language |  Syntax                          |
 | -------- |  --------------------------------------- |
 | Julia    | `glm(@formula(measurement ~ x), data, Binomial())`    |
@@ -374,7 +409,6 @@ The syntax is both unimportant and similar
 | intercept | -4.7 | -6 |
 | slope | 1.6 | 2 |
 
-![bg right h:100%](media/12.svg)
 
 <!-- 
 
@@ -383,8 +417,16 @@ The syntax is both unimportant and similar
 ---
 
 # GLMM
+## Advantages
 
-![bg right w:100%](media/12.svg)
+- Factors out between-group variation
+- So deals with repeated measures or longitudinal data
+
+---
+
+# GLMM
+
+![bg right:70% w:100%](media/12.svg)
 
 <!-- 
 
@@ -393,7 +435,7 @@ The syntax is both unimportant and similar
 ---
 # GLMM
 
-![bg right h:100%](media/13.svg)
+![bg right:70% w:100%](media/13.svg)
 
 <!-- 
 
@@ -402,10 +444,21 @@ The syntax is both unimportant and similar
 ---
 # GLMM
 
-![bg right h:100%](media/14.svg)
+![bg right:70% w:100%](media/14.svg)
 
 <!-- 
 
 -->
 
 ---
+# GLMM
+
+![bg right:70% w:100%](media/15.svg)
+
+<!-- 
+
+-->
+
+---
+
+# Demo time!
