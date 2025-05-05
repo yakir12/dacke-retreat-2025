@@ -7,7 +7,7 @@ backgroundImage: url('https://marp.app/assets/hero-background.svg')
 math: mathjax
 ---
 
-# **GLMs**
+# **LM, GLM, & GLMM**
 
 Understanding Generalized Linear Models
 
@@ -454,6 +454,15 @@ The syntax is both unimportant and similar
 # GLMM
 
 ![bg right:70% w:100%](media/15.svg)
+
+<!-- 
+
+-->
+
+---
+# GLMM
+
+![bg right:70% w:100%](media/19.svg)
 
 <!-- 
 

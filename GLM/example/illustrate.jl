@@ -1,9 +1,9 @@
 using MixedModels, GLM, CairoMakie, DataFrames, AlgebraOfGraphics, Distributions, Random
 model(intercept, slope, x) = intercept + slope*x
 measure(μ) = rand(Normal(μ, σ))
-function sample1(x, μi, slope)
-    μ = model(0, slope, x)
-    measure(μ) + μi
+function sample1(X, Y, x, slope)
+    μ = model(0, slope, x - X)
+    measure(μ) + Y
 end
 
 ngroups = 20
@@ -15,13 +15,13 @@ slope = 0.5
 bad_intercept = -intercept
 bad_slope = -1/2
 
-df = DataFrame(seed = range(-0.5, 0.5, ngroups), id = 1:ngroups)
-# df = DataFrame(seed = rand(Uniform(-0.5, 0.5), ngroups), id = 1:ngroups)
-transform!(df, :seed => (seed -> bad_intercept .+ bad_slope*seed) => :μ)
-transform!(df, :seed => ByRow(seed -> rand(Truncated(Normal(seed, 0.05), -0.5, 0.5), n)) => :x)
+df = DataFrame(X = range(-0.5, 0.5, ngroups), id = 1:ngroups)
+# df = DataFrame(X = rand(Uniform(-0.5, 0.5), ngroups), id = 1:ngroups)
+transform!(df, :X => (X -> bad_intercept .+ bad_slope*X) => :Y)
+transform!(df, :X => ByRow(X -> rand(Truncated(Normal(X, 0.05), -0.5, 0.5), n)) => :x)
 df0 = flatten(df, :x)
-# df0 = flatten(select(df, Not(:seed)), :x)
-transform!(df0, [:x, :μ, :seed] => ByRow((x, μ, seed) -> sample1(x - seed, μ, slope)) => :y)
+# df0 = flatten(select(df, Not(:X)), :x)
+transform!(df0, [:X, :Y, :x] => ByRow((X, Y, x) -> sample1(X, Y, x, slope)) => :y)
 
 
 m2 = fit(MixedModel, @formula(y ~ 1 + x + (1|id)), df0)
@@ -59,24 +59,28 @@ save("../media/15.svg", fig)
 
 
 
-
-
-function sample2(x, μi, intercept)
-    slope = (μi - intercept)/x
+function sample2(X, Y, x, intercept)
+    slope = (Y - intercept)/X
     μ = model(intercept, slope, x)
     measure(μ)
 end
 
+ngroups = 20
+n = 5
+intercept = 5
+slope = 0.5
+σ = 0.005
+
 bad_intercept = -intercept
 bad_slope = -1/2
 
-df = DataFrame(seed = range(-0.5, 0.5, ngroups), id = 1:ngroups)
-# df = DataFrame(seed = rand(Uniform(-0.5, 0.5), ngroups), id = 1:ngroups)
-transform!(df, :seed => (seed -> bad_intercept .+ bad_slope*seed) => :μ)
-transform!(df, :seed => ByRow(seed -> rand(Truncated(Normal(seed, 0.05), -0.5, 0.5), n)) => :x)
+df = DataFrame(X = range(0.5, 1.5, ngroups), id = 1:ngroups)
+# df = DataFrame(X = rand(Uniform(-0.5, 0.5), ngroups), id = 1:ngroups)
+transform!(df, :X => (X -> bad_intercept .+ bad_slope*X) => :Y)
+transform!(df, :X => ByRow(X -> rand(Truncated(Normal(X, 0.05), 0.5, 1.5), n)) => :x)
 df0 = flatten(df, :x)
-# df0 = flatten(select(df, Not(:seed)), :x)
-transform!(df0, [:x, :μ, :seed] => ByRow((x, μ, seed) -> sample2(x, μ, intercept)) => :y)
+# df0 = flatten(select(df, Not(:X)), :x)
+transform!(df0, [:X, :Y, :x] => ByRow((X, Y, x) -> sample2(X, Y, x, intercept)) => :y)
 
 
 m2 = fit(MixedModel, @formula(y ~ 1 + x + (1|id)), df0)
@@ -84,6 +88,9 @@ ndf2 = flatten(combine(groupby(df0, :id), :x => extrema => :x), :x)
 ndf2.y .= 0.0
 ndf2.y .= predict(m2, ndf2)
 rand_inter_lines = combine(groupby(ndf2, :id), [:x, :y] => ((x, y) -> Pair(Point2.(x, y)...)) => :segments).segments
+
+
+
 
 h = 400
 fig = Figure(size = (h / slope, h), backgroundcolor = :transparent)
