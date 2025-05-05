@@ -1,6 +1,6 @@
 using MixedModels, GLM, GLMakie, DataFrames, AlgebraOfGraphics, Distributions, Random
 
-ngroups = 6
+ngroups = 60
 n = 5
 intercept = 5
 slope = 2
@@ -17,23 +17,21 @@ ndf2.y .= 0.0
 model(intercept, slope, x) = intercept + slope*x
 measure(μ) = rand(Normal(μ, σ))
 
-function individual_noise(σ)
-    rand(Normal(0, σ), ngroups)
-end
-
-function sample1(x, id, individual_slopes)
-    μ = model(intercept, individual_slopes[id] + slope, x)
+function sample1(x, id, individual_intercepts, individual_slopes)
+    μ = model(individual_intercepts[id] + intercept, individual_slopes[id] + slope, x)
     measure(μ)
 end
 
 fig = Figure()
-sg = SliderGrid(fig[1, 1:2], (label = "slope std", range = 0:0.1:10, startvalue = 0))
+sg = SliderGrid(fig[1, 1:2], (label = "intercept std", range = 0:0.1:10, startvalue = 0),
+                             (label = "slope std", range = 0:0.1:10, startvalue = 0))
 
-slope_sigma = sg.sliders[].value
+intercept_sigma, slope_sigma = [sl.value for sl in sg.sliders]
 
-individual_slopes = map(individual_noise, slope_sigma)
+individual_intercepts = @lift rand(Normal(0, $intercept_sigma), ngroups)
+individual_slopes = @lift rand(Normal(0, $slope_sigma), ngroups)
 
-df = @lift transform(df0, [:x, :id] => ByRow((x, id) -> sample1(x, id, $individual_slopes)) => :y)
+df = @lift transform(df0, [:x, :id] => ByRow((x, id) -> sample1(x, id, $individual_intercepts, $individual_slopes)) => :y)
 
 datapoints = @lift Point2.($df.x, $df.y)
 
@@ -41,20 +39,20 @@ m1 = @lift lm(@formula(y ~ 1 + x), $df)
 
 m1p = map(m1) do m1
     tbl = coeftable(m1)
-    p = tbl.cols[tbl.pvalcol][1]
+    p = tbl.cols[tbl.pvalcol][2]
     round(p, digits = 2)
 end
 
 m1ab = @lift round.(coef($m1), digits = 2)
 
-m2 = @lift fit(MixedModel, @formula(y ~ 1 + x + (0+x|id)), $df)
+m2 = @lift fit(MixedModel, @formula(y ~ 1 + x + (1+x|id)), $df)
 
 rand_inter_lines = map(m2) do m2
     ndf2.y .= predict(m2, ndf2)
     combine(groupby(ndf2, :id), [:x, :y] => ((x, y) -> Pair(Point2.(x, y)...)) => :segments).segments
 end
 
-m2p = @lift round($m2.pvalues[1], digits = 2)
+m2p = @lift round($m2.pvalues[2], digits = 2)
 
 m2ab = @lift round.(fixef($m2), digits = 2)
 

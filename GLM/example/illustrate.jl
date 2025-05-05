@@ -67,7 +67,7 @@ end
 
 ngroups = 20
 n = 5
-intercept = 5
+intercept = -2
 slope = 0.5
 σ = 0.005
 
@@ -108,14 +108,29 @@ delete!(ax, hscatter)
 scatter!(ax, df0.x, df0.y, color = df0.id, marker = ('a':'z')[df0.id], colormap = Makie.wong_colors())
 save("../media/18.svg", fig)
 
+h = Vector{Any}(undef, ngroups)
 for (i, g) in enumerate(groupby(df0, :id))
     m = lm(@formula(y ~ 1 + x), g)
     a, b = coef(m)
     x = [extrema(g.x)...]
     y = a .+ b*x
-    lines!(ax, x, y, color = i, colorrange = (1, ngroups), colormap = Makie.wong_colors())
+    h[i] = lines!(ax, x, y, color = i, colorrange = (1, ngroups), colormap = Makie.wong_colors())
 end
 save("../media/19.svg", fig)
+
+for hi in h
+    delete!(ax, hi)
+end
+
+for (i, g) in enumerate(groupby(df0, :id))
+    m = lm(@formula(y ~ 1 + x), g)
+    a, b = coef(m)
+    x = [extrema(g.x)...]
+    x[1] = 0.0
+    y = a .+ b*x
+    lines!(ax, x, y, color = i, colorrange = (1, ngroups), colormap = Makie.wong_colors())
+end
+save("../media/20.svg", fig)
 
 
 
