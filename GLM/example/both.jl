@@ -61,7 +61,7 @@ ablines!(ax1, intercept, slope, color = :gray, linewidth = 4)
 ablines!(ax1, map(first, m1ab), map(last, m1ab), color = :red)
 scatter!(ax1, datapoints, color = :black)
 
-ax2 = Axis(fig[2,2], title = "Random slope")
+ax2 = Axis(fig[2,2], title = "Random intercept & slope")
 ablines!(ax2, intercept, slope, color = :gray, linewidth = 4)
 ablines!(ax2, map(first, m2ab), map(last, m2ab), color = :red)
 scatter!(ax2, datapoints, color = @lift($df.id), colorrange = (1, ngroups))
