@@ -277,6 +277,7 @@ QUICK
 
 * What is the standard deviation of this probability distribution?
 * It's 1!
+* The distribution of the residuals, not the data!
 
 ![bg right h:100%](media/9.svg)
 
@@ -296,7 +297,7 @@ There can be more than just one regressor
 
 # GLM
 
-- The residuals of the response variable don't have to be linearly distributed 
+- The residuals of the response variable don't have to be normally distributed 
 - Easy to interpret
 - Able to deal with categorical predictors
 - Deals fine with unbalanced datasets
@@ -322,6 +323,12 @@ Generalized Linear Models
 <!-- 
 ʻohana means family (from the lilo and stitch movie)
 Less "how is you data distributed" and more "what is your data"
+Skew:            
+⠀▆█⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀██▅⠀⠀⠀⠀⠀⠀⠀⠀
+⠀███▂⠀⠀⠀⠀⠀⠀⠀
+▅████▂⠀⠀⠀⠀⠀⠀
+██████▅▂▁▁⠀
 -->
 
 ---
@@ -438,7 +445,13 @@ end
 
 
 <!-- 
-and now we can sample from that bernoulli distribution. Each vertical line represents a measure, and you can tell that as X increases so does the probability of getting true.
+and now we can sample from that bernoulli distribution. 
+stochastic
+Each vertical line represents a measure, and you can tell that as X increases so does the probability of getting true.
+write each distribution and the parameters it takes
+Poisson: lambda (0, infinity)
+Gamma: shape and scale, both >0
+
 -->
 
 ---

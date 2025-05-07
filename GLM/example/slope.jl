@@ -26,8 +26,8 @@ function sample1(x, id, individual_slopes)
     measure(μ)
 end
 
-fig = Figure()
-sg = SliderGrid(fig[1, 1:2], (label = "slope std", range = 0:0.1:10, startvalue = 0))
+fig = Figure(fontsize = 50)
+sg = SliderGrid(fig[1, 1:2], (label = "slope σ", range = 0:0.1:10, startvalue = 0))
 
 slope_sigma = sg.sliders[].value
 

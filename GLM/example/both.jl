@@ -1,14 +1,14 @@
 using MixedModels, GLM, GLMakie, DataFrames, AlgebraOfGraphics, Distributions, Random
 
-ngroups = 60
+ngroups = 10
 n = 5
-intercept = 5
-slope = 2
-σ = 0.1
+intercept = 1
+slope = 1
+σ = 0.01
 
 
 df = DataFrame(seed = rand(ngroups) .- 0.5, id = 1:ngroups)
-transform!(df, :seed => ByRow(seed -> rand(Truncated(Normal(seed, 0.2), -0.5, 0.5), n)) => :x)
+transform!(df, :seed => ByRow(seed -> rand(Truncated(Normal(seed, 1), -0.5, 0.5), n)) => :x)
 df0 = flatten(select(df, Not(:seed)), :x)
 
 ndf2 = flatten(combine(groupby(df0, :id), :x => extrema => :x), :x)
@@ -22,11 +22,18 @@ function sample1(x, id, individual_intercepts, individual_slopes)
     measure(μ)
 end
 
-fig = Figure()
-sg = SliderGrid(fig[1, 1:2], (label = "intercept std", range = 0:0.1:10, startvalue = 0),
-                             (label = "slope std", range = 0:0.1:10, startvalue = 0))
+fig = Figure(fontsize = 50)
+sg = SliderGrid(fig[1, 1:2], (label = "intercept σ", range = 0:0.1:2, startvalue = 0),
+                             (label = "slope σ", range = 0:0.1:2, startvalue = 0),
+                             (label = "both σ", range = 0:0.1:2, startvalue = 0))
 
-intercept_sigma, slope_sigma = [sl.value for sl in sg.sliders]
+intercept_sigma, slope_sigma, both_sigma = [sl.value for sl in sg.sliders]
+
+on(both_sigma) do σ
+    for sl in sg.sliders
+        set_close_to!(sl, σ)
+    end
+end
 
 individual_intercepts = @lift rand(Normal(0, $intercept_sigma), ngroups)
 individual_slopes = @lift rand(Normal(0, $slope_sigma), ngroups)
