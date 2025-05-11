@@ -114,6 +114,72 @@ data(df) * mapping(:predictor, :success, color = :same) * visual(Scatter; alpha 
 
 using Turing
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@model function bayesian_model(x, y)
+    σ² ~ InverseGamma(2, 3)
+    σ = sqrt(σ²)
+    slope ~ Normal(0, 10)
+    intercept ~ Normal(10, 10)
+    μ = intercept + slope * x
+    y ~ Normal(μ, σ)
+end
+
+
+
+
+@model function bayesian_model(theta)
+    mu1 ~ VonMises(0, 0.1)
+    kappa1 ~ InverseGamma(2,3)
+    mu2 ~ VonMises(0, 0.1)
+    kappa2 ~ InverseGamma(2,3)
+    theta ~ VonMises(mu2, kappa2) + VonMises(mu1, kappa1) 
+end
+
+
+@model function bayesian_model(radius, exit_angle)
+    σ² ~ InverseGamma(2, 3)
+    σ = sqrt(σ²)
+    slope ~ Normal(0, 10)
+    intercept ~ Normal(10, 10)
+    kappa = intercept + slope * radius
+    mu ~ VonMises(0, 0.1)
+    exit_angle ~ VonMises(mu, kappa)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @model function bmodel(predictor, measurement)
     σ² ~ InverseGamma(2, 3)
     σ = sqrt(σ²)

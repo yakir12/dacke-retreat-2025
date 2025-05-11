@@ -27,11 +27,11 @@ function fun(ngroups, n, σ, intercept_sigma, slope_sigma)
     return m1Δ, m2Δ
 end
 
-ngroupss = round.(Int, range(5, 100, 5))
-ns = round.(Int, range(5, 100, 5))
-σs = range(0.01, 10, 5)
-intercept_sigmas = range(0.01, 100, 5)
-slope_sigmas = range(0.01, 100, 5)
+ngroupss = round.(Int, range(5, 100, 10))
+ns = round.(Int, range(5, 100, 10))
+σs = range(0.01, 10, 10)
+intercept_sigmas = range(0.01, 100, 10)
+slope_sigmas = range(0.01, 100, 10)
 df = DataFrame(ngroups = Int[], n = Int[], σ = Float64[], intercept_sigma = Float64[], slope_sigma = Float64[], m1Δ = Float64[], m2Δ = Float64[])
 for (i, ngroups) in enumerate(ngroupss), (j, n) in enumerate(ns), (k, σ) in enumerate(σs), (l, intercept_sigma) in enumerate(intercept_sigmas), (l, slope_sigma) in enumerate(slope_sigmas)
     m1Δ, m2Δ = fun(ngroups, n, σ, intercept_sigma, slope_sigma)
@@ -39,7 +39,14 @@ for (i, ngroups) in enumerate(ngroupss), (j, n) in enumerate(ns), (k, σ) in enu
 end
 
 transform!(df, [:m1Δ, :m2Δ] => ByRow(-) => :Δ)
-data(df) * mapping(:σ, :Δ, row = :ngroups => nonnumeric, col = :n => nonnumeric) * visual(Lines) |> draw()#; axis = (; limits = (nothing, (-4, 0))))
 
-# df = stack(df, [:m1Δ, :m2Δ])
-# data(df) * mapping(:σ, :value, color = :variable, row = :ngroups => nonnumeric, col = :n => nonnumeric) * visual(Scatter) |> draw(; axis = (; limits = (nothing, (0, 1))))
+hist(df.Δ, bins = nrow(df) ÷ 10)
+
+count(df.m1Δ .> df.m2Δ)/nrow(df)
+
+# data(df) * mapping(:σ, :Δ, row = :ngroups => nonnumeric, col = :n => nonnumeric) * visual(Lines) |> draw()#; axis = (; limits = (nothing, (-4, 0))))
+
+# i = 5
+# df1 = stack(subset(df, :intercept_sigma => ByRow(==(intercept_sigmas[i])), :slope_sigma => ByRow(==(slope_sigmas[i]))), [:m1Δ, :m2Δ])
+# data(df1) * mapping(:σ, :value, color = :variable, row = :ngroups => nonnumeric, col = :n => nonnumeric) * visual(Scatter) |> draw()#; axis = (; limits = (nothing, (0, 1))))
+
